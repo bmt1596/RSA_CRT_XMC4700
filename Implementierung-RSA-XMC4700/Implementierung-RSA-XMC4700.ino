@@ -4,7 +4,7 @@
 /*  Konzeption und Umsetzung eines Demonstrators für Fehlerangriff            */
 /*  Implementierung des RSA-CRT-1024 auf Microkontrolle                       */
 /*  Autor: Minh Tung Bui                                                      */
-/*  Datum: 23.05.2020                                                         */
+/*  Datum: 16.06.2020                                                         */
 /******************************************************************************/
 #include <Arduino.h>
 #include <stdio.h>
@@ -13,6 +13,7 @@
 #include "flint.h"
 #include <time.h>
 
+// Globale Variable
 //--------------------------------------------------------------------------------------------------------//
 CLINT p_primzahl;
 CLINT q_primzahl;
@@ -25,16 +26,15 @@ CLINT rsa_verschluesseln;
 CLINT rsa_entschluesseln;
 CLINT signatur;
 CLINT rsa_crt_entschluesseln;
-
-
 //--------------------------------------------------------------------------------------------------------//
 
+// Benötige Funktionen
 //--------------------------------------------------------------------------------------------------------//
-
 void key_nachricht_eingabe(CLINT  p_primzahl, CLINT q_primzahl, CLINT n_schluessel, CLINT e_schluessel, CLINT d_schluessel, CLINT klar_nachricht);
 void q_m_algorithmus(CLINT x, CLINT k, CLINT n, CLINT result);
 void rsa_crt_berechnung(CLINT p, CLINT q, CLINT n, CLINT d, CLINT m, CLINT sig);
 //--------------------------------------------------------------------------------------------------------//
+
 
 /******************************************************************************/
 /*                                                                            */
@@ -54,16 +54,16 @@ void key_nachricht_eingabe(CLINT  p, CLINT q, CLINT n, CLINT e, CLINT d, CLINT n
   char* d_string;
   char* nachricht_string;
 
-
+  // define the key
+  // key 512 bit for p and q
   p_string = "11795317444500306937296443701637670745746525063104042626600976573633031471379047119083862849534349538550078382348191081532534475137066828256989692139486629";
   q_string = "7868644142912179714115928082505320512408119917588632421408882074064457021075596367421100729962382030653938550295854442088128490145278080967338239725652703";
   e_string = "65537";
   d_string = "46614050293034373325443877126442612949132519631281662680377524721015919390897036941887012839683698975718594758446032265203637128372009737520951105545938522460054637812967436441254594251567731220742619688242364325799203043306042718153228467130163541200019074408396350960866750372422859773584522786875458941993";
   nachricht_string = "3";
-
-  // 32 bit
-
+ 
   /*
+   *   // 32 bit
   p_string = "57287";
   q_string = "35099";
 
@@ -72,8 +72,9 @@ void key_nachricht_eingabe(CLINT  p, CLINT q, CLINT n, CLINT e, CLINT d, CLINT n
   nachricht_string = "10";
   */
 
-  // 56 bit
+ 
   /*
+   *  // 56 bit
   p_string = "179747107";
   q_string = "145564691";
 
@@ -81,24 +82,16 @@ void key_nachricht_eingabe(CLINT  p, CLINT q, CLINT n, CLINT e, CLINT d, CLINT n
   d_string = "3078215501563193";
   nachricht_string = "10";
   */
-  // 256 bit
+  
  /*
+  * // 256 bit
   p_string = "270151268997351570427300498619178698791";
   q_string = "173992259560136077954468563215860193761";
-
   e_string = "17";
   d_string = "16589728135019060126979788698714626009056588370954210116464117109249674429553";
   nachricht_string = "987654321";
  */
-  // 512bit
-  /*
-  p_string = "12734287211212000363316749332372938860669504563326456903749173515093424653554504307694166952555756407374956530438332940962135073348805434087253711438936387";
-  q_string = "12664908753218935801100573263184836267614132220393597510449193037880926526349931480315719878573325978590984212250253150150092020222944798432411195213417129";
-
-  e_string = "65537";
-  d_string = "77190371751666387579522847969554915378699668521556448591573771987313468184179811821762559382216466395400135335250282502937463536876492634205262956801488217254989328334528649974929640003781590305563020607988833482090753318605441462250546872923950057421978091288216120920571401419726769730079881164294083959601";
-  nachricht_string = "98765432111112212111112112111111111111111111111111111111111111111111111111";
-   */
+ 
   // Konvertierung des Zeichenkette
   str2clint_l(p, p_string, 10);
   str2clint_l(q, q_string, 10);
@@ -109,8 +102,8 @@ void key_nachricht_eingabe(CLINT  p, CLINT q, CLINT n, CLINT e, CLINT d, CLINT n
   // öffentlicher Schlüssel n berechnen
   mul_l(p, q, n);
 }
-//--------------------------------------------------------------------------------------------------------//
 
+//--------------------------------------------------------------------------------------------------------//
 /******************************************************************************/
 /*                                                                            */
 /*  Funktion:  Berechnung zum Quadrat-Multiplikation-Algorithmus              */
@@ -151,8 +144,7 @@ void rsa_crt_berechnung(CLINT p, CLINT q, CLINT n, CLINT d, CLINT m, CLINT sig)
 {
   int vorzeichen_u;
   int vorzeichen_v;
-   
-   
+    
   CLINT p_1;            // Ergebnis: p-1
   CLINT q_1;            // Ergebnis: q-1
   CLINT d_p;            // Ergebnis: dp = d mod(p-1)
@@ -230,7 +222,7 @@ void rsa_crt_berechnung(CLINT p, CLINT q, CLINT n, CLINT d, CLINT m, CLINT sig)
 
 
 //--------------------------------------------------------------------------------------------------------//
-// the setup function runs once when you press reset or power the board
+// Die Setup-Funktion wird einmal ausgeführt, wenn Sie Reset drücken oder die Karte mit Strom versorgen
 void setup() {
   // initialize digital pin LED_BUILTIN as an output.
   Serial.begin(9600);
@@ -239,20 +231,23 @@ void setup() {
   // init key
   key_nachricht_eingabe(p_primzahl, q_primzahl, n_schluessel, e_schluessel, d_schluessel, klar_nachricht);
 }
-
 //--------------------------------------------------------------------------------------------------------//
-// the loop function runs over and over again forever
+
+
+// Die Schleifenfunktion läuft immer wieder für immer
 void loop() {  
 
-    // c = m^e mod n
+      // c = m^e mod n
      q_m_algorithmus(klar_nachricht, e_schluessel, n_schluessel, rsa_verschluesseln);
 
-    // signatur erstellen
+      // signatur erstellen
      rsa_crt_berechnung(p_primzahl, q_primzahl, n_schluessel, d_schluessel, klar_nachricht, signatur);
 
-     digitalWrite(LED_BUILTIN, LOW);   // turn the LED on (HIGH is the voltage level)
+    
+      // LED einschalten (HIGH ist der Spannungspegel)
+     digitalWrite(LED_BUILTIN, LOW);   
      delay(1000);
-     
+      // m = c^d mod n
       q_m_algorithmus(rsa_verschluesseln, d_schluessel, n_schluessel, rsa_entschluesseln);
      // Signaltur entschlüsseln
      q_m_algorithmus(signatur, e_schluessel, n_schluessel, rsa_crt_entschluesseln);
