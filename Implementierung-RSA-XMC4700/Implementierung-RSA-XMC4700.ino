@@ -12,6 +12,9 @@
 #include <string.h>
 #include "flint.h"
 #include <time.h>
+#define LED2 25
+#define TRIGGER 8 // Pin P.1.10
+
 
 // Globale Variable
 //--------------------------------------------------------------------------------------------------------//
@@ -60,7 +63,7 @@ void key_nachricht_eingabe(CLINT  p, CLINT q, CLINT n, CLINT e, CLINT d, CLINT n
   q_string = "7868644142912179714115928082505320512408119917588632421408882074064457021075596367421100729962382030653938550295854442088128490145278080967338239725652703";
   e_string = "65537";
   d_string = "46614050293034373325443877126442612949132519631281662680377524721015919390897036941887012839683698975718594758446032265203637128372009737520951105545938522460054637812967436441254594251567731220742619688242364325799203043306042718153228467130163541200019074408396350960866750372422859773584522786875458941993";
-  nachricht_string = "3";
+  nachricht_string = "30";
  
   /*
    *   // 32 bit
@@ -227,6 +230,8 @@ void setup() {
   // initialize digital pin LED_BUILTIN as an output.
   Serial.begin(9600);
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LED2,OUTPUT);
+  pinMode(TRIGGER, OUTPUT);
 
   // init key
   key_nachricht_eingabe(p_primzahl, q_primzahl, n_schluessel, e_schluessel, d_schluessel, klar_nachricht);
@@ -235,23 +240,25 @@ void setup() {
 
 
 // Die Schleifenfunktion läuft immer wieder für immer
-void loop() {  
-
+void loop() {
+     digitalWrite(LED2, HIGH); 
+     digitalWrite(TRIGGER, HIGH);
       // c = m^e mod n
-     q_m_algorithmus(klar_nachricht, e_schluessel, n_schluessel, rsa_verschluesseln);
+     // q_m_algorithmus(klar_nachricht, e_schluessel, n_schluessel, rsa_verschluesseln);
 
       // signatur erstellen
      rsa_crt_berechnung(p_primzahl, q_primzahl, n_schluessel, d_schluessel, klar_nachricht, signatur);
 
     
-      // LED einschalten (HIGH ist der Spannungspegel)
-     digitalWrite(LED_BUILTIN, LOW);   
-     delay(1000);
-      // m = c^d mod n
-      q_m_algorithmus(rsa_verschluesseln, d_schluessel, n_schluessel, rsa_entschluesseln);
+      // LED einschalten (HIGH ist der Spannungspegel)   
+     // delay(1000);
+     // m = c^d mod n
+     // q_m_algorithmus(rsa_verschluesseln, d_schluessel, n_schluessel, rsa_entschluesseln);
      // Signaltur entschlüsseln
      q_m_algorithmus(signatur, e_schluessel, n_schluessel, rsa_crt_entschluesseln);
-     
+
+     digitalWrite(LED2, LOW);
+     digitalWrite(TRIGGER, LOW);
      digitalWrite(LED_BUILTIN, HIGH);    // turn the LED off by making the voltage LOW
 
      Serial.println("-----Implementierung RSA−CRT−1024-----");
@@ -267,11 +274,11 @@ void loop() {
      Serial.println("---------------Nachricht--------------");
      Serial.println(xclint2str_l(klar_nachricht, 10, 0));
      
-     Serial.println("--------------------------------------");
-     Serial.println("verschluecsselte Nachricht (c):");
-     Serial.println(xclint2str_l(rsa_verschluesseln, 10, 0));
-     Serial.println("entschluecsselte Nachricht (m):");
-     Serial.println(xclint2str_l(rsa_entschluesseln, 10, 0));
+     // Serial.println("--------------------------------------");
+     // Serial.println("verschluecsselte Nachricht (c):");
+     // Serial.println(xclint2str_l(rsa_verschluesseln, 10, 0));
+     // Serial.println("entschluecsselte Nachricht (m):");
+     // Serial.println(xclint2str_l(rsa_entschluesseln, 10, 0));
      
      Serial.println("--------------------------------------");
      Serial.println("Signatur sig:");
@@ -279,6 +286,10 @@ void loop() {
      Serial.println("entschluecsselte Nachricht (m):");
      Serial.println(xclint2str_l(rsa_crt_entschluesseln, 10, 0)); 
      Serial.println("--------------------------------------\n\n");
+
+
+     digitalWrite(LED_BUILTIN, LOW);
+     
      
      delay(5000);
      
