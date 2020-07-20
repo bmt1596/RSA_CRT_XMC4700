@@ -15,7 +15,6 @@
 #define LED2 25
 #define TRIGGER 8 // Pin P.1.10
 
-
 // Globale Variable
 //--------------------------------------------------------------------------------------------------------//
 CLINT p_primzahl;
@@ -63,7 +62,8 @@ void key_nachricht_eingabe(CLINT  p, CLINT q, CLINT n, CLINT e, CLINT d, CLINT n
   q_string = "7868644142912179714115928082505320512408119917588632421408882074064457021075596367421100729962382030653938550295854442088128490145278080967338239725652703";
   e_string = "65537";
   d_string = "46614050293034373325443877126442612949132519631281662680377524721015919390897036941887012839683698975718594758446032265203637128372009737520951105545938522460054637812967436441254594251567731220742619688242364325799203043306042718153228467130163541200019074408396350960866750372422859773584522786875458941993";
-  nachricht_string = "30";
+  //nachricht_string = "9998888777766665555444433332222111";
+  nachricht_string = "11111111111111111111111111111111112222222222222222222222222222222222333333333333333333333333333333";
  
   /*
    *   // 32 bit
@@ -182,8 +182,18 @@ void rsa_crt_berechnung(CLINT p, CLINT q, CLINT n, CLINT d, CLINT m, CLINT sig)
 
   xgcd_l(p, q, ggT, u, &vorzeichen_u, v, &vorzeichen_v);
 
+  digitalWrite(LED2, HIGH); 
+  digitalWrite(TRIGGER, HIGH);
   q_m_algorithmus(m, d_p, p, sig_p);  //sig_p sig_q berechnen
+  digitalWrite(LED2, LOW);
+  digitalWrite(TRIGGER, LOW);
+
+
+  digitalWrite(LED2, HIGH); 
+  digitalWrite(TRIGGER, HIGH);
   q_m_algorithmus(m, d_q, q, sig_q);
+  digitalWrite(LED2, LOW);
+  digitalWrite(TRIGGER, LOW);
   
   // Betrachtung: ob u größer oder kleiner als 0 ist?
   if (vorzeichen_u >= 0)
@@ -209,18 +219,34 @@ void rsa_crt_berechnung(CLINT p, CLINT q, CLINT n, CLINT d, CLINT m, CLINT sig)
   }
 
   // Berechnung u*p*sigq
+  digitalWrite(LED2, HIGH); 
+  digitalWrite(TRIGGER, HIGH);
   mmul_l(p, sig_q, p_sigq, n);
   mmul_l(p_sigq, u_mod_n, u_p_sigq_mod_n, n);
+  digitalWrite(LED2, LOW);
+  digitalWrite(TRIGGER, LOW);
 
   // Berechnung v*q*sigp
+  digitalWrite(LED2, HIGH); 
+  digitalWrite(TRIGGER, HIGH);
   mmul_l(q, sig_p, q_sigp, n);
   mmul_l(q_sigp, v_mod_n, v_q_sigp_mod_n, n);
+  digitalWrite(LED2, LOW);
+  digitalWrite(TRIGGER, LOW);
 
   // Berechnung u*p*sigq + v*q*sigp
+  digitalWrite(LED2, HIGH); 
+  digitalWrite(TRIGGER, HIGH);
   add_l(u_p_sigq_mod_n, v_q_sigp_mod_n, sum);
+  digitalWrite(LED2, LOW);
+  digitalWrite(TRIGGER, LOW);
 
   // Berechnung sig = (u*p*sigq + v*q*sigp) mod n
+  digitalWrite(LED2, HIGH); 
+  digitalWrite(TRIGGER, HIGH);
   mod_l(sum, n, sig);
+  digitalWrite(LED2, LOW);
+  digitalWrite(TRIGGER, LOW);
 }
 
 
@@ -241,8 +267,10 @@ void setup() {
 
 // Die Schleifenfunktion läuft immer wieder für immer
 void loop() {
-     digitalWrite(LED2, HIGH); 
-     digitalWrite(TRIGGER, HIGH);
+
+  while(1)
+  {
+     
       // c = m^e mod n
      // q_m_algorithmus(klar_nachricht, e_schluessel, n_schluessel, rsa_verschluesseln);
 
@@ -257,8 +285,6 @@ void loop() {
      // Signaltur entschlüsseln
      q_m_algorithmus(signatur, e_schluessel, n_schluessel, rsa_crt_entschluesseln);
 
-     digitalWrite(LED2, LOW);
-     digitalWrite(TRIGGER, LOW);
      digitalWrite(LED_BUILTIN, HIGH);    // turn the LED off by making the voltage LOW
 
      Serial.println("-----Implementierung RSA−CRT−1024-----");
@@ -267,30 +293,35 @@ void loop() {
      Serial.println("Primzahl q:");
      Serial.println(xclint2str_l(q_primzahl, 10, 0));
 
+     Serial.println("Key n:");
+     Serial.println(xclint2str_l(n_schluessel, 10, 0));
      Serial.println("Key e:");
      Serial.println(xclint2str_l(e_schluessel, 10, 0));
      Serial.println("Key d:");
      Serial.println(xclint2str_l(d_schluessel, 10, 0));      
      Serial.println("---------------Nachricht--------------");
      Serial.println(xclint2str_l(klar_nachricht, 10, 0));
-     
-     // Serial.println("--------------------------------------");
-     // Serial.println("verschluecsselte Nachricht (c):");
-     // Serial.println(xclint2str_l(rsa_verschluesseln, 10, 0));
-     // Serial.println("entschluecsselte Nachricht (m):");
-     // Serial.println(xclint2str_l(rsa_entschluesseln, 10, 0));
-     
+
+     /*
+     Serial.println("--------------------------------------");
+     Serial.println("verschluecsselte Nachricht (c):");
+     Serial.println(xclint2str_l(rsa_verschluesseln, 10, 0));
+     Serial.println("entschluecsselte Nachricht (m):");
+     Serial.println(xclint2str_l(rsa_entschluesseln, 10, 0));
+     */
      Serial.println("--------------------------------------");
      Serial.println("Signatur sig:");
      Serial.println(xclint2str_l(signatur, 10, 0));
      Serial.println("entschluecsselte Nachricht (m):");
      Serial.println(xclint2str_l(rsa_crt_entschluesseln, 10, 0)); 
      Serial.println("--------------------------------------\n\n");
-
-
      digitalWrite(LED_BUILTIN, LOW);
-     
-     
-     delay(5000);
+     delay(1000);
+
+      // Vergleich entschlüsseltes Endergebnis mit vorgegebenen Nachricht
+     if(rsa_crt_entschluesseln != klar_nachricht)
+     break;
+  }
+  digitalWrite(LED_BUILTIN, HIGH);
      
 }
