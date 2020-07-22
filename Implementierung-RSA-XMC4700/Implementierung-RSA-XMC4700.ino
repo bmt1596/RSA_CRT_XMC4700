@@ -35,6 +35,7 @@ CLINT rsa_crt_entschluesseln;
 void key_nachricht_eingabe(CLINT  p_primzahl, CLINT q_primzahl, CLINT n_schluessel, CLINT e_schluessel, CLINT d_schluessel, CLINT klar_nachricht);
 void q_m_algorithmus(CLINT x, CLINT k, CLINT n, CLINT result);
 void rsa_crt_berechnung(CLINT p, CLINT q, CLINT n, CLINT d, CLINT m, CLINT sig);
+void Rekonstruktion(CLINT n, CLINT e, CLINT false_sig, CLINT m);
 //--------------------------------------------------------------------------------------------------------//
 
 
@@ -58,12 +59,12 @@ void key_nachricht_eingabe(CLINT  p, CLINT q, CLINT n, CLINT e, CLINT d, CLINT n
 
   // define the key
   // key 512 bit for p and q
-  p_string = "11795317444500306937296443701637670745746525063104042626600976573633031471379047119083862849534349538550078382348191081532534475137066828256989692139486629";
-  q_string = "7868644142912179714115928082505320512408119917588632421408882074064457021075596367421100729962382030653938550295854442088128490145278080967338239725652703";
+  p_string = "12355447201996786223067845453089966155621529271987222799944585111546270800751840420291657666412823976768984203289835886682223739447439167720310045412751343";
+  q_string = "7964425044439495923757589331704696128150003049220525388097712928890862029392562595568033481348699709432989762039048403304516632936475468458303019508597377";
   e_string = "65537";
-  d_string = "46614050293034373325443877126442612949132519631281662680377524721015919390897036941887012839683698975718594758446032265203637128372009737520951105545938522460054637812967436441254594251567731220742619688242364325799203043306042718153228467130163541200019074408396350960866750372422859773584522786875458941993";
+  d_string = "58036112250682224834609318837259461007715489847295721103231439416162020536804016599384512414167238220088768259793424232018681277966877157132821579731484061495793938596152416549039074678298306184628891517674155481943952508285804132725503524179321307189118313087839129280922257414197819978344781120922280571905";
   //nachricht_string = "9998888777766665555444433332222111";
-  nachricht_string = "11111111111111111111111111111111112222222222222222222222222222222222333333333333333333333333333333";
+  nachricht_string = "999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999";
  
   /*
    *   // 32 bit
@@ -171,11 +172,17 @@ void rsa_crt_berechnung(CLINT p, CLINT q, CLINT n, CLINT d, CLINT m, CLINT sig)
   
   CLINT sum;            // Ergebnis: u*p*sigq + v*q*sigp
 
+  // Test false_sig
+  /*
+  char* false_sig_p_string;
+  false_sig_p_string = "0";
+  str2clint_l(sig_p ,false_sig_p_string, 10);
+  */
+  //
   cpy_l(p_1, p);        // p_1, q_1 berechnnen
   dec_l(p_1);
   cpy_l(q_1, q);
   dec_l(q_1);
-
 
   mod_l(d, p_1, d_p);   // dp berechnen
   mod_l(d, q_1, d_q);   // dq berechnen
@@ -186,14 +193,14 @@ void rsa_crt_berechnung(CLINT p, CLINT q, CLINT n, CLINT d, CLINT m, CLINT sig)
   digitalWrite(TRIGGER, HIGH);
   q_m_algorithmus(m, d_p, p, sig_p);  //sig_p sig_q berechnen
   digitalWrite(LED2, LOW);
-  digitalWrite(TRIGGER, LOW);
+  //digitalWrite(TRIGGER, LOW);
 
 
   digitalWrite(LED2, HIGH); 
   digitalWrite(TRIGGER, HIGH);
   q_m_algorithmus(m, d_q, q, sig_q);
   digitalWrite(LED2, LOW);
-  digitalWrite(TRIGGER, LOW);
+  //digitalWrite(TRIGGER, LOW);
   
   // Betrachtung: ob u größer oder kleiner als 0 ist?
   if (vorzeichen_u >= 0)
@@ -224,7 +231,7 @@ void rsa_crt_berechnung(CLINT p, CLINT q, CLINT n, CLINT d, CLINT m, CLINT sig)
   mmul_l(p, sig_q, p_sigq, n);
   mmul_l(p_sigq, u_mod_n, u_p_sigq_mod_n, n);
   digitalWrite(LED2, LOW);
-  digitalWrite(TRIGGER, LOW);
+  //digitalWrite(TRIGGER, LOW);
 
   // Berechnung v*q*sigp
   digitalWrite(LED2, HIGH); 
@@ -232,21 +239,104 @@ void rsa_crt_berechnung(CLINT p, CLINT q, CLINT n, CLINT d, CLINT m, CLINT sig)
   mmul_l(q, sig_p, q_sigp, n);
   mmul_l(q_sigp, v_mod_n, v_q_sigp_mod_n, n);
   digitalWrite(LED2, LOW);
-  digitalWrite(TRIGGER, LOW);
+  //digitalWrite(TRIGGER, LOW);
 
   // Berechnung u*p*sigq + v*q*sigp
   digitalWrite(LED2, HIGH); 
   digitalWrite(TRIGGER, HIGH);
   add_l(u_p_sigq_mod_n, v_q_sigp_mod_n, sum);
   digitalWrite(LED2, LOW);
-  digitalWrite(TRIGGER, LOW);
+  //digitalWrite(TRIGGER, LOW);
 
   // Berechnung sig = (u*p*sigq + v*q*sigp) mod n
   digitalWrite(LED2, HIGH); 
   digitalWrite(TRIGGER, HIGH);
   mod_l(sum, n, sig);
   digitalWrite(LED2, LOW);
-  digitalWrite(TRIGGER, LOW);
+  //digitalWrite(TRIGGER, LOW);
+}
+
+void Rekonstruktion(CLINT n, CLINT e, CLINT false_sig, CLINT m)
+{
+  CLINT d;
+
+  CLINT u_clint;            // Faktor u
+  CLINT v_clint;            // Faktor v
+  CLINT m_mod_n;
+
+  CLINT false_sig_e;
+  CLINT m_false_sig_e;        // m-false_sig ^ e
+  CLINT m_false_sig_mod_n;      // (m-false_sig) mod n
+  CLINT Primzahl1;          // (Primzahl 1) es kann p oder q sein
+  CLINT Primzahl2;          // (Primzahl 2) es kann p oder q sein
+  CLINT Primzahl1_dec;
+  CLINT Primzahl2_dec;
+  CLINT phi;
+  CLINT Rest;
+  CLINT x;
+
+  int vorzeichen_u;
+  int vorzeichen_v;
+
+  mod_l(m, n, m_mod_n);
+  q_m_algorithmus(false_sig, e, n, false_sig_e);
+
+
+  int vergleich = cmp_l(m_mod_n, false_sig_e);
+
+  // Wenn m_mod_n größer als false_sig_e
+  if (vergleich == 1)
+  {
+    sub_l(m_mod_n, false_sig_e, m_false_sig_e);
+    mod_l(m_false_sig_e, n, m_false_sig_mod_n);
+    
+  }
+
+  // Wenn m_mod_n kleiner als false_sig_e
+  else if (vergleich == -1)
+  { 
+    CLINT Sub1;
+    CLINT Sub2;
+    CLINT Result;
+
+    sub_l(false_sig_e, m_mod_n, Sub2);
+    cpy_l(Sub1, n);
+
+    while (1)
+    {
+      add_l(Sub1, n, Sub1);
+      int loop = cmp_l(Sub1, Sub2);
+      if (loop == 1)
+        break;
+    }
+
+    sub_l(Sub1, Sub2, Result);
+    mod_l(Result, n, m_false_sig_mod_n);  
+  }
+  
+  // berechnen Primzahl1 aus n und (m-false_sig^e) mod n
+  xgcd_l(n, m_false_sig_mod_n, Primzahl1, u_clint, &vorzeichen_u, v_clint, &vorzeichen_v);
+  
+
+  // berechnet Primzahl2
+  div_l(n, Primzahl1, Primzahl2, Rest);
+  
+  // phi berechnen
+  cpy_l(Primzahl1_dec, Primzahl1);
+  cpy_l(Primzahl2_dec, Primzahl2);
+  dec_l(Primzahl1_dec);
+  dec_l(Primzahl2_dec);
+  mul_l(Primzahl1_dec, Primzahl2_dec, phi);
+
+  // d berechnen
+  inv_l(e, phi, x, d);
+
+  Serial.println("Primzahl 1:");
+  Serial.println(xclint2str_l(Primzahl1, 10, 0));
+  Serial.println("Primzahl 2:");
+  Serial.println(xclint2str_l(Primzahl2, 10, 0));
+  Serial.println("Privater Schlueeseln d :");
+  Serial.println(xclint2str_l(d, 10, 0));
 }
 
 
@@ -268,8 +358,8 @@ void setup() {
 // Die Schleifenfunktion läuft immer wieder für immer
 void loop() {
 
-  while(1)
-  {
+  //while(1)
+  //{
      
       // c = m^e mod n
      // q_m_algorithmus(klar_nachricht, e_schluessel, n_schluessel, rsa_verschluesseln);
@@ -287,6 +377,7 @@ void loop() {
 
      digitalWrite(LED_BUILTIN, HIGH);    // turn the LED off by making the voltage LOW
 
+     /*
      Serial.println("-----Implementierung RSA−CRT−1024-----");
      Serial.println("Primzahl p:");
      Serial.println(xclint2str_l(p_primzahl, 10, 0));
@@ -301,7 +392,7 @@ void loop() {
      Serial.println(xclint2str_l(d_schluessel, 10, 0));      
      Serial.println("---------------Nachricht--------------");
      Serial.println(xclint2str_l(klar_nachricht, 10, 0));
-
+     */
      /*
      Serial.println("--------------------------------------");
      Serial.println("verschluecsselte Nachricht (c):");
@@ -318,10 +409,20 @@ void loop() {
      digitalWrite(LED_BUILTIN, LOW);
      delay(1000);
 
+     int zahl = equ_l(rsa_crt_entschluesseln,klar_nachricht);
+     if(zahl == 0)
+     {
+      Serial.println("Fehler: Falsche Signatur");
+      Serial.println("Falsche Signatur ist:");
+      Serial.println(xclint2str_l(signatur, 10, 0));
+      Rekonstruktion(n_schluessel, e_schluessel, signatur, klar_nachricht); 
+      delay(10000);
+     }
+
       // Vergleich entschlüsseltes Endergebnis mit vorgegebenen Nachricht
-     if(rsa_crt_entschluesseln != klar_nachricht)
-     break;
-  }
-  digitalWrite(LED_BUILTIN, HIGH);
+   //  if(rsa_crt_entschluesseln != klar_nachricht)
+   //  break;
+ // }
+ // digitalWrite(LED_BUILTIN, HIGH);
      
 }
