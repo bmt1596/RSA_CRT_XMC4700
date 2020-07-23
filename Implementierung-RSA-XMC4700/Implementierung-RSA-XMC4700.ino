@@ -3,7 +3,7 @@
 /*  Elektrotechnik und Informationstechnik (HAW)                              */
 /*  Konzeption und Umsetzung eines Demonstrators für Fehlerangriff            */
 /*  Implementierung des RSA-CRT-1024 auf Microkontrolle                       */
-/*  Autor: Minh Tung Bui                                                      */
+/*  Autor: Minh Tung Bui, Marcel Delissen                                                      */
 /*  Datum: 16.06.2020                                                         */
 /******************************************************************************/
 #include <Arduino.h>
