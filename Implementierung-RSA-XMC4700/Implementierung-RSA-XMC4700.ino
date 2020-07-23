@@ -12,10 +12,12 @@
 #include <string.h>
 #include "flint.h"
 #include <time.h>
+
+
 #define LED2 25
 #define TRIGGER 8           // Pin P.1.10
 #define SIMULATION 0        // 0 oder 1
-#define ANZAHL_BIT 1024     // 32, 1024, 256, 512
+#define ANZAHL_BIT 32     // 32, 1024, 256, 512
 
 // Globale Variable
 //--------------------------------------------------------------------------------------------------------//
@@ -344,11 +346,11 @@ void Rekonstruktion(CLINT n, CLINT e, CLINT false_sig, CLINT m)
   // d berechnen
   inv_l(e, phi, x, d);
 
-  Serial.println("Primzahl 1:");
+  Serial.println("(Rekonstruktion) Primzahl 1:");
   Serial.println(xclint2str_l(Primzahl1, 10, 0));
-  Serial.println("Primzahl 2:");
+  Serial.println("(Rekonstruktion) Primzahl 2:");
   Serial.println(xclint2str_l(Primzahl2, 10, 0));
-  Serial.println("Privater Schlueeseln d :");
+  Serial.println("(Rekonstruktion) Privater Schlueeseln d :");
   Serial.println(xclint2str_l(d, 10, 0));
 }
 
