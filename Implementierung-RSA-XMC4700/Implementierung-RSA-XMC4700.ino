@@ -17,7 +17,7 @@
 #define LED2 25
 #define TRIGGER 8           // Pin P.1.10
 #define SIMULATION 0        // 0 oder 1
-#define ANZAHL_BIT 32     // 32, 1024, 256, 512
+#define ANZAHL_BIT 1024       // 32, 1024, 256, 512
 
 // Globale Variable
 //--------------------------------------------------------------------------------------------------------//
@@ -68,7 +68,7 @@ void key_nachricht_eingabe(CLINT  p, CLINT q, CLINT n, CLINT e, CLINT d, CLINT n
   q_string = "7964425044439495923757589331704696128150003049220525388097712928890862029392562595568033481348699709432989762039048403304516632936475468458303019508597377";
   e_string = "65537";
   d_string = "58036112250682224834609318837259461007715489847295721103231439416162020536804016599384512414167238220088768259793424232018681277966877157132821579731484061495793938596152416549039074678298306184628891517674155481943952508285804132725503524179321307189118313087839129280922257414197819978344781120922280571905";
-  nachricht_string = "30";
+  nachricht_string = "11111111111111111111111111111111111";
  }
  else if(ANZAHL_BIT == 32)
  {
@@ -187,7 +187,7 @@ void rsa_crt_berechnung(CLINT p, CLINT q, CLINT n, CLINT d, CLINT m, CLINT sig)
   digitalWrite(LED2, HIGH); 
   digitalWrite(TRIGGER, HIGH);
 
-  // Test false_sig
+  // Simulation false_sig
   if(SIMULATION == 1)
   {
     char* false_sig_p_string;
@@ -200,14 +200,14 @@ void rsa_crt_berechnung(CLINT p, CLINT q, CLINT n, CLINT d, CLINT m, CLINT sig)
   }
   
   digitalWrite(LED2, LOW);
-  //digitalWrite(TRIGGER, LOW);
+  digitalWrite(TRIGGER, LOW);
 
 
   digitalWrite(LED2, HIGH); 
   digitalWrite(TRIGGER, HIGH);
   q_m_algorithmus(m, d_q, q, sig_q);
   digitalWrite(LED2, LOW);
-  //digitalWrite(TRIGGER, LOW);
+  digitalWrite(TRIGGER, LOW);
   
   // Betrachtung: ob u größer oder kleiner als 0 ist?
   if (vorzeichen_u >= 0)
@@ -238,7 +238,7 @@ void rsa_crt_berechnung(CLINT p, CLINT q, CLINT n, CLINT d, CLINT m, CLINT sig)
   mmul_l(p, sig_q, p_sigq, n);
   mmul_l(p_sigq, u_mod_n, u_p_sigq_mod_n, n);
   digitalWrite(LED2, LOW);
-  //digitalWrite(TRIGGER, LOW);
+  digitalWrite(TRIGGER, LOW);
 
   // Berechnung v*q*sigp
   digitalWrite(LED2, HIGH); 
@@ -246,21 +246,21 @@ void rsa_crt_berechnung(CLINT p, CLINT q, CLINT n, CLINT d, CLINT m, CLINT sig)
   mmul_l(q, sig_p, q_sigp, n);
   mmul_l(q_sigp, v_mod_n, v_q_sigp_mod_n, n);
   digitalWrite(LED2, LOW);
-  //digitalWrite(TRIGGER, LOW);
+  digitalWrite(TRIGGER, LOW);
 
   // Berechnung u*p*sigq + v*q*sigp
   digitalWrite(LED2, HIGH); 
   digitalWrite(TRIGGER, HIGH);
   add_l(u_p_sigq_mod_n, v_q_sigp_mod_n, sum);
   digitalWrite(LED2, LOW);
-  //digitalWrite(TRIGGER, LOW);
+  digitalWrite(TRIGGER, LOW);
 
   // Berechnung sig = (u*p*sigq + v*q*sigp) mod n
   digitalWrite(LED2, HIGH); 
   digitalWrite(TRIGGER, HIGH);
   mod_l(sum, n, sig);
   digitalWrite(LED2, LOW);
-  //digitalWrite(TRIGGER, LOW);
+  digitalWrite(TRIGGER, LOW);
 }
 /******************************************************************************/
 /*                                                                            */
@@ -423,7 +423,7 @@ void loop() {
      Serial.println(xclint2str_l(rsa_crt_entschluesseln, 10, 0)); 
      Serial.println("--------------------------------------\n\n");
      digitalWrite(LED_BUILTIN, LOW);
-     delay(1000);
+    
 
      int zahl = equ_l(rsa_crt_entschluesseln,klar_nachricht);
      if(zahl == 0)
@@ -440,5 +440,7 @@ void loop() {
    //  break;
  // }
  // digitalWrite(LED_BUILTIN, HIGH);
-     
+
+       delay(3000);
+
 }
