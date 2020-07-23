@@ -14,6 +14,7 @@
 #include <time.h>
 #define LED2 25
 #define TRIGGER 8 // Pin P.1.10
+#define SIMULATION 0
 
 // Globale Variable
 //--------------------------------------------------------------------------------------------------------//
@@ -59,22 +60,23 @@ void key_nachricht_eingabe(CLINT  p, CLINT q, CLINT n, CLINT e, CLINT d, CLINT n
 
   // define the key
   // key 512 bit for p and q
+  /*
   p_string = "12355447201996786223067845453089966155621529271987222799944585111546270800751840420291657666412823976768984203289835886682223739447439167720310045412751343";
   q_string = "7964425044439495923757589331704696128150003049220525388097712928890862029392562595568033481348699709432989762039048403304516632936475468458303019508597377";
   e_string = "65537";
   d_string = "58036112250682224834609318837259461007715489847295721103231439416162020536804016599384512414167238220088768259793424232018681277966877157132821579731484061495793938596152416549039074678298306184628891517674155481943952508285804132725503524179321307189118313087839129280922257414197819978344781120922280571905";
   //nachricht_string = "9998888777766665555444433332222111";
-  nachricht_string = "999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999";
- 
-  /*
-   *   // 32 bit
+  nachricht_string = "30";
+ */
+  
+      // 32 bit
   p_string = "57287";
   q_string = "35099";
 
   e_string = "17";
   d_string = "354816005";
   nachricht_string = "10";
-  */
+  
 
  
   /*
@@ -172,12 +174,6 @@ void rsa_crt_berechnung(CLINT p, CLINT q, CLINT n, CLINT d, CLINT m, CLINT sig)
   
   CLINT sum;            // Ergebnis: u*p*sigq + v*q*sigp
 
-  // Test false_sig
-  /*
-  char* false_sig_p_string;
-  false_sig_p_string = "0";
-  str2clint_l(sig_p ,false_sig_p_string, 10);
-  */
   //
   cpy_l(p_1, p);        // p_1, q_1 berechnnen
   dec_l(p_1);
@@ -188,10 +184,22 @@ void rsa_crt_berechnung(CLINT p, CLINT q, CLINT n, CLINT d, CLINT m, CLINT sig)
   mod_l(d, q_1, d_q);   // dq berechnen
 
   xgcd_l(p, q, ggT, u, &vorzeichen_u, v, &vorzeichen_v);
-
+  
   digitalWrite(LED2, HIGH); 
   digitalWrite(TRIGGER, HIGH);
-  q_m_algorithmus(m, d_p, p, sig_p);  //sig_p sig_q berechnen
+
+  // Test false_sig
+  if(SIMULATION == 1)
+  {
+    char* false_sig_p_string;
+    false_sig_p_string = "0";
+    str2clint_l(sig_p ,false_sig_p_string, 10);
+  }
+  else if(SIMULATION == 0)
+  {
+    q_m_algorithmus(m, d_p, p, sig_p);  //sig_p sig_q berechnen
+  }
+  
   digitalWrite(LED2, LOW);
   //digitalWrite(TRIGGER, LOW);
 
@@ -255,7 +263,15 @@ void rsa_crt_berechnung(CLINT p, CLINT q, CLINT n, CLINT d, CLINT m, CLINT sig)
   digitalWrite(LED2, LOW);
   //digitalWrite(TRIGGER, LOW);
 }
-
+/******************************************************************************/
+/*                                                                            */
+/*  Funktion:  Rekonstruktion des privaten Schlüssels d                       */
+/*  Syntax:    void Rekonstruktion(CLINT n, CLINT e, CLINT false_sig, CLINT m)*/                                            
+/*  Eingabe:   Schlüssel (n,e) , m (Nachricht), false_sig                      */
+/*  Ausgabe:   privaten Schlüssel d                                             */
+/*  Rueckgabe: null                                                           */
+/*                                        */
+/******************************************************************************/
 void Rekonstruktion(CLINT n, CLINT e, CLINT false_sig, CLINT m)
 {
   CLINT d;
@@ -389,10 +405,11 @@ void loop() {
      Serial.println("Key e:");
      Serial.println(xclint2str_l(e_schluessel, 10, 0));
      Serial.println("Key d:");
-     Serial.println(xclint2str_l(d_schluessel, 10, 0));      
+     Serial.println(xclint2str_l(d_schluessel, 10, 0));     
+     */ 
      Serial.println("---------------Nachricht--------------");
      Serial.println(xclint2str_l(klar_nachricht, 10, 0));
-     */
+     
      /*
      Serial.println("--------------------------------------");
      Serial.println("verschluecsselte Nachricht (c):");
